@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Request Catcher</title>
+</head>
+<body>
+  <h2>Custom Request Catcher</h2>
+  <p>Last request received:</p>
+  <pre id="output">Waiting for request...</pre>
+
+  <script>
+    fetch("/last-request.json")
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById("output").textContent = JSON.stringify(data, null, 2);
+        if (data.url) {
+          console.log("Try ====>", new URL(data.url).hostname);
+        }
+      })
+      .catch(err => console.error("No request received yet", err));
+  </script>
+</body>
+</html>
