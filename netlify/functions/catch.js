@@ -1,22 +1,28 @@
-const fs = require("fs");
-const path = require("path");
+let lastRequest = null;
 
 exports.handler = async (event) => {
   if (event.httpMethod !== "POST") {
     return { statusCode: 405, body: "Method Not Allowed" };
   }
 
-  const data = {
-    url: event.headers["x-forwarded-host"] || "unknown",
-    headers: event.headers,
-    body: event.body,
-  };
+  try {
+    lastRequest = {
+      url: JSON.parse(event.body).url,
+      headers: event.headers,
+      body: JSON.parse(event.body),
+    };
 
-  const filePath = path.resolve("/tmp/last-request.json");
-  fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
-
-  return {
-    statusCode: 200,
-    body: JSON.stringify({ message: "Request received!" }),
-  };
+    return {
+      statusCode: 200,
+      body: JSON.stringify({ message: "Request received!" }),
+    };
+  } catch (err) {
+    return {
+      statusCode: 400,
+      body: JSON.stringify({ error: "Invalid request format" }),
+    };
+  }
 };
+
+// Expose the state globally (so `last-request.js` can access it)
+global.lastRequest = () => lastRequest;
